@@ -2,91 +2,174 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+require("dotenv").config();
 
 const app = express();
 
-app.use(cors());
+// Middleware
 app.use(express.json());
 
-// MongoDB connection
-mongoose.connect("mongodb://127.0.0.1:27017/taskmanager")
-.then(() => console.log("MongoDB Connected"))
-.catch(err => console.log(err));
+const allowedOrigins = [
+  "http://localhost:5173",
+  process.env.FRONTEND_URL
+].filter(Boolean);
 
-// Task Schema
-const TaskSchema = new mongoose.Schema({
-    title: {
-        type: String,
-        required: true
-    },
-    status: {
-        type: String,
-        enum: ["Pending", "Ongoing", "Completed"],
-        default: "Pending"
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
     }
+    return callback(new Error("Not allowed by CORS"));
+  },
+  methods: ["GET", "POST", "PATCH", "DELETE"],
+  allowedHeaders: ["Content-Type"]
+}));
+
+// MongoDB Task Schema
+const taskSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  status: {
+    type: String,
+    enum: ["Pending", "Ongoing", "Completed"],
+    default: "Pending"
+  }
+}, {
+  timestamps: true
 });
 
-const Task = mongoose.model("Task", TaskSchema);
+const Task = mongoose.model("Task", taskSchema);
 
-// Get all tasks
+// Home Route
+app.get("/", (req, res) => {
+  res.send("Task Manager API is running successfully!");
+});
+
+// Get All Tasks
 app.get("/tasks", async (req, res) => {
-    try {
-        const tasks = await Task.find();
-        res.json(tasks);
-    } catch (err) {
-        res.status(500).json({ message: "Error fetching tasks" });
-    }
+  try {
+    const tasks = await Task.find().sort({ createdAt: -1 });
+    res.status(200).json(tasks);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });
 
-// Add task
+// Add New Task
 app.post("/tasks", async (req, res) => {
-    try {
-        const task = new Task({
-            title: req.body.title
-        });
+  try {
+    const { title } = req.body || {};
 
-        const savedTask = await task.save();
-        res.status(201).json(savedTask);
-    } catch (err) {
-        res.status(400).json({ message: "Error creating task" });
+    if (typeof title !== "string" || !title.trim()) {
+      return res.status(400).json({
+        message: "Task title is required"
+      });
     }
+
+    const task = new Task({
+      title: title.trim()
+    });
+
+    const savedTask = await task.save();
+
+    res.status(201).json(savedTask);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });
 
-// Update task status
+// Update Task Status
 app.patch("/tasks/:id", async (req, res) => {
-    try {
-        const updatedTask = await Task.findByIdAndUpdate(
-            req.params.id,
-            { status: req.body.status },
-            { new: true, runValidators: true }
-        );
+  try {
+    const { status } = req.body;
 
-        if (!updatedTask) {
-            return res.status(404).json({ message: "Task not found" });
-        }
+    const allowedStatuses = [
+      "Pending",
+      "Ongoing",
+      "Completed"
+    ];
 
-        res.json(updatedTask);
-    } catch (err) {
-        res.status(400).json({ message: "Error updating task" });
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        message: "Invalid task status"
+      });
     }
+
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({
+        message: "Invalid task ID"
+      });
+    }
+
+    const updatedTask = await Task.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedTask) {
+      return res.status(404).json({
+        message: "Task not found"
+      });
+    }
+
+    res.status(200).json(updatedTask);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });
 
-// Delete task
+// Delete Task
 app.delete("/tasks/:id", async (req, res) => {
-    try {
-        const deletedTask = await Task.findByIdAndDelete(req.params.id);
-
-        if (!deletedTask) {
-            return res.status(404).json({ message: "Task not found" });
-        }
-
-        res.json({ message: "Task deleted successfully" });
-    } catch (err) {
-        res.status(400).json({ message: "Error deleting task" });
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({
+        message: "Invalid task ID"
+      });
     }
+
+    const deletedTask = await Task.findByIdAndDelete(
+      req.params.id
+    );
+
+    if (!deletedTask) {
+      return res.status(404).json({
+        message: "Task not found"
+      });
+    }
+
+    res.status(200).json({
+      message: "Task deleted successfully"
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });
 
-// Start server
-app.listen(5000, () => {
-    console.log("Server running on port 5000");
-});
+// Connect MongoDB and Start Server
+const PORT = process.env.PORT || 5000;
+
+async function startServer() {
+  try {
+    if (!process.env.MONGODB_URI) {
+      throw new Error("MONGODB_URI is missing in environment variables");
+    }
+
+    await mongoose.connect(process.env.MONGODB_URI);
+
+    console.log("MongoDB Atlas Connected Successfully");
+
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+
+  } catch (error) {
+    console.error("Server startup failed:", error.message);
+    process.exit(1);
+  }
+}
+
+startServer();

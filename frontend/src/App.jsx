@@ -2,7 +2,13 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 
-const API = "http://localhost:5000/tasks";
+const configuredApiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE_URL = (
+  /^https?:\/\//i.test(configuredApiUrl)
+    ? configuredApiUrl
+    : `https://${configuredApiUrl}`
+).replace(/\/+$/, "");
+const API = `${API_BASE_URL}/tasks`;
 
 function App() {
   const [tasks, setTasks] = useState([]);
@@ -21,7 +27,24 @@ function App() {
   };
 
   useEffect(() => {
-    fetchTasks();
+    let cancelled = false;
+
+    const loadTasks = async () => {
+      try {
+        const response = await fetch(API);
+        if (!response.ok) throw new Error();
+        const data = await response.json();
+        if (!cancelled) setTasks(data);
+      } catch {
+        if (!cancelled) setMessage("Unable to connect to backend!");
+      }
+    };
+
+    loadTasks();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const addTask = async () => {

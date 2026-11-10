@@ -1,16 +1,21 @@
-# React + Vite
+# Task Manager
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Run locally
 
-Currently, two official plugins are available:
+1. Start the backend from the `backend` directory with `npm start`. It needs
+   `MONGODB_URI` in `backend/.env`; `PORT` is optional and defaults to `5000`.
+2. Start the frontend from the `frontend` directory with `npm run dev`.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+The frontend uses `http://localhost:5000` by default. To point it at another
+backend, set `VITE_API_URL` to its origin before building, for example
+`https://api.example.com`.
 
-## React Compiler
+## Deploy
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The root `render.yaml` defines the backend web service and frontend static site.
+Create a Render Blueprint from the repository and enter `MONGODB_URI` and
+`FRONTEND_URL` when prompted. Set `FRONTEND_URL` to the deployed frontend's
+origin, including `https://`. Render supplies the backend `PORT` and populates
+the frontend's `VITE_API_URL` from the backend service hostname.
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+The frontend build output is in `frontend/dist`.

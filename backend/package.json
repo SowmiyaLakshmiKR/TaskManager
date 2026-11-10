@@ -1,4 +1,3 @@
-
 {
   "name": "taskmanager-backend",
   "version": "1.0.0",
@@ -7,8 +6,9 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.21.2",
-    "mongoose": "^8.9.5",
-    "cors": "^2.8.5"
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.10",
+    "express": "^4.22.3",
+    "mongoose": "^8.24.8"
   }
 }
