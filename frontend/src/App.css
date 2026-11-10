@@ -1,0 +1,124 @@
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6fb;
+}
+
+.app {
+  max-width: 1200px;
+  margin: auto;
+  padding: 30px 20px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 35px;
+}
+
+header h1 {
+  color: #303f9f;
+  font-size: 38px;
+}
+
+header p {
+  color: #666;
+}
+
+.add-section {
+  display: flex;
+  gap: 10px;
+  max-width: 700px;
+  margin: 0 auto 20px;
+}
+
+.add-section input {
+  flex: 1;
+  padding: 14px;
+  border: 1px solid #ccc;
+  border-radius: 7px;
+  font-size: 16px;
+}
+
+button {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 3px;
+  color: white;
+}
+
+.add-btn {
+  background: #303f9f;
+}
+
+.message {
+  text-align: center;
+  color: #303f9f;
+}
+
+.task-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 35px;
+}
+
+.task-column {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  min-height: 300px;
+  box-shadow: 0 3px 12px #ddd;
+}
+
+.task-column h2 {
+  font-size: 20px;
+  color: #303f9f;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 12px;
+}
+
+.task-card {
+  background: #f4f6fb;
+  padding: 15px;
+  margin-top: 15px;
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+}
+
+.task-card h3 {
+  font-size: 17px;
+}
+
+.task-card p,
+.empty {
+  color: #666;
+}
+
+.ongoing-btn {
+  background: #2196f3;
+}
+
+.complete-btn {
+  background: #28a745;
+}
+
+.delete-btn {
+  background: #dc3545;
+}
+
+@media (max-width: 750px) {
+  .task-container {
+    grid-template-columns: 1fr;
+  }
+
+  .add-section {
+    flex-direction: column;
+  }
+}
