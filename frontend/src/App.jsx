@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 
-const configuredApiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const configuredApiUrl = import.meta.env.VITE_API_URL || "https://taskmanager-mq2v.onrender.com";
 const API_BASE_URL = (
   /^https?:\/\//i.test(configuredApiUrl)
     ? configuredApiUrl
