@@ -10,7 +10,7 @@ const app = express();
 app.use(express.json());
 
 const allowedOrigins = [
-  "http://localhost:5173",
+  "https://task-manager-vert-six-94.vercel.app",
   process.env.FRONTEND_URL
 ].filter(Boolean);
 
